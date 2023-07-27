@@ -32,7 +32,7 @@
             <div class="flex items-center justify-center sm:-mt-6">
               <label for="image" class="relative cursor-pointer">
                 <img
-                  src="../assets/455e656696c1479f1ed0.jpg"
+                  :src="userImage"
                   width="95"
                   class="rounded-full h-[95px] object-cover"
                   alt=""
@@ -117,12 +117,28 @@
         class="absolute p-5 bottom-0 left-0 border-t border-t-gray-300 w-full"
       >
         <div
-          id="UpdateInfoButton"
+          id="UpdateInfoButtons"
           v-if="!uploadImage"
           class="flex items-center justify-end"
         >
           <button
             @click="generalStore.isEditProfileOpen = false"
+            class="flex items-center border px-3 py-[6px] rounded-md hover:bg-gray-100"
+          >
+            <span class="px-2 font-medium text-[15px]">Cancel</span>
+          </button>
+          <button
+            :disabled="!isUpdated"
+            :class="!isUpdated ? 'bg-gray-200' : 'bg-[#f02c56]'"
+            class="flex items-center bg-[#f02c56] text-white border rounded-md ml-3 px-3 py-[6px]"
+            @click="updateUserInfo()"
+          >
+            <span class="mx-4 font-medium text-[15px]">Save</span>
+          </button>
+        </div>
+        <div id="CropperButtons" v-else class="flex items-center justify-end">
+          <button
+            @click="uploadImage = null"
             class="flex items-center border px-3 py-[6px] rounded-md hover:bg-gray-100"
           >
             <span class="px-2 font-medium text-[15px]">Cancel</span>
@@ -141,14 +157,15 @@
 
 <script setup>
 import { onMounted, ref, watch } from "vue";
-import { generalStore, userStore } from "../stores";
+import { generalStore, profileStore, userStore } from "../stores";
 import { PencilIcon, XMarkIcon } from "@heroicons/vue/24/solid";
 import TextInput from "./TextInput.vue";
 import { Cropper, CircleStencil } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 import { storeToRefs } from "pinia";
+import { useRoute } from "vue-router";
 const { name, bio, image } = storeToRefs(userStore);
-
+const route = useRoute();
 onMounted(() => {
   userName.value = name.value;
   userBio.value = bio.value;
@@ -177,20 +194,62 @@ watch(
   }
 );
 
+const cropAndUpdateImage = async () => {
+  const { coordinates } = cropper.value.getResult();
+  let data = new FormData();
+  data.append("image", file.value || "");
+  data.append("height", coordinates.height || "");
+  data.append("width", coordinates.width || "");
+  data.append("left", coordinates.left || "");
+  data.append("top", coordinates.top || "");
+
+  try {
+    await userStore.updateUserImage(data);
+    await userStore.getUser();
+    await profileStore.getProfile(route.params.id);
+
+    generalStore.updateSideMenuImage(generalStore.suggested, userStore);
+    generalStore.updateSideMenuImage(generalStore.following, userStore);
+
+    userImage.value = image.value;
+    uploadImage.value = null;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const updateUserInfo = async () => {
+  try {
+    await userStore.updateUser(userName.value, userBio.value);
+    await userStore.getUser();
+    await profileStore.getProfile(route.params.id);
+
+    userName.value = name.value;
+    userBio.value = bio.value;
+
+    setTimeout(() => {
+      generalStore.isEditProfileOpen = false;
+    }, 100);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 watch(
-  () => userBio.value,
+  () => userName.value,
   () => {
-    if (!userBio.value || userBio.value === bio.value) {
+    if (!userName.value || userName.value === name.value) {
       isUpdated.value = false;
     } else {
       isUpdated.value = true;
     }
   }
 );
+
 watch(
-  () => userImage.value,
+  () => userBio.value,
   () => {
-    if (!userImage.value || userImage.value === image.value) {
+    if (!userName.value || userBio.value.length < 1) {
       isUpdated.value = false;
     } else {
       isUpdated.value = true;

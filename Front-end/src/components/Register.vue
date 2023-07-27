@@ -75,10 +75,11 @@ const register = async () => {
       confirmPassword.value
     );
     await userStore.getUser();
-
+    console.log(email);
     generalStore.isLoginOpen = false;
   } catch (error) {
     console.log(error);
+    errors.value = error.response.data.errors;
   }
 };
 </script>

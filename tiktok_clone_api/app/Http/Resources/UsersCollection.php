@@ -14,16 +14,15 @@ class UsersCollection extends ResourceCollection
      */
     public function toArray(Request $request)
     {
-        return $this->collection->map(function($user){
+        return $this->collection->map(function ($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'bio' => $user->bio,
-                'image' =>url('/'). $user->image,
+                'image' => url('/') . $user->image,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
-
-            ]
-        })
+            ];
+        });
     }
 }

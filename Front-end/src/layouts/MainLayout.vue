@@ -2,8 +2,10 @@
   <div>
     <TopNav />
     <div class="mx-0 lg:mx-2 flex w-full">
-      <SlideNav class="" />
-      <slot />
+      <SlideNav />
+      <div class="w-full flex justify-center">
+        <slot />
+      </div>
     </div>
   </div>
 </template>

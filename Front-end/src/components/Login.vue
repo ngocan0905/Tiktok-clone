@@ -7,7 +7,7 @@
       v-model:input="email"
       inputType="email"
       :autoFocus="true"
-      error=""
+      :error="errors && errors.email ? errors.email[0] : ''"
     />
   </div>
   <div class="px-6 pb-1.5 text-[15px]">Password</div>
@@ -16,6 +16,7 @@
       placeholder="Password"
       v-model:input="password"
       inputType="password"
+      :error="errors && errors.password ? errors.password[0] : ''"
     />
   </div>
   <div class="px-6 text-[12px] text-gray-600">Forgot password?</div>
@@ -33,8 +34,8 @@
 <script setup>
 import { ref } from "vue";
 import TextInput from "./TextInput.vue";
-import axiosClient from "../api/axiosClient";
 import { userStore, generalStore } from "../stores";
+
 let email = ref(null);
 let password = ref(null);
 let errors = ref(null);
@@ -44,6 +45,8 @@ const login = async () => {
     await userStore.getTokens();
     await userStore.login(email.value, password.value);
     await userStore.getUser();
+    userStore.saveUserToLocalStorage();
+    console.log(userStore.id);
     generalStore.isLoginOpen = false;
   } catch (error) {
     console.log(error);

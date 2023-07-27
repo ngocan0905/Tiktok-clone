@@ -1,13 +1,23 @@
 <template>
   <MainLayout>
-    <div
-      class="pt-[80px] w-[calc(100%-90px)] max-w-[690px] h-full flex items-center"
-    >
-      <PostMain />
+    <div class="pt-[80px] w-[calc(100%-90px)] max-w-[690px]">
+      <div v-for="post in generalStore.posts" :key="post">
+        <PostMain v-if="post" :post="post" />
+      </div>
     </div>
   </MainLayout>
 </template>
 <script setup>
+import { onMounted } from "vue";
 import PostMain from "../components/PostMain.vue";
 import MainLayout from "../layouts/MainLayout.vue";
+import { generalStore } from "../stores";
+
+onMounted(async () => {
+  try {
+    await generalStore.getAllUserAndPosts();
+  } catch (error) {
+    console.log(error);
+  }
+});
 </script>

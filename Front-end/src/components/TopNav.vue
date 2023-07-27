@@ -64,7 +64,12 @@
               class="absolute z-30 w-[200px] top-10 right-8 bg-gray-50 shadow-lg border-b border-l rounded-md"
             >
               <router-link
-                :to="`/profile/${userStore.id}`"
+                :to="{
+                  name: 'profile',
+                  params: {
+                    id: userStore.id,
+                  },
+                }"
                 class="flex items-center p-2"
               >
                 <UserCircleIcon class="w-8 h-8"></UserCircleIcon
@@ -95,20 +100,18 @@ import {
 } from "@heroicons/vue/24/outline";
 import { onMounted, ref } from "vue";
 import { userStore, generalStore } from "../stores";
-import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
 
-const route = useRoute();
 const router = useRouter();
 let showMenu = ref(false);
-// onMounted(() => {
-//   document.addEventListener("mouseup", function (e) {
-//     let popupMenu = document.getElementById("PopupMenu");
-//     if (!popupMenu.contains(e.target)) {
-//       showMenu.value = false;
-//     }
-//   });
-// });
+onMounted(() => {
+  document.addEventListener("mouseup", function (e) {
+    let popupMenu = document.getElementById("PopupMenu");
+    if (!popupMenu?.contains(e.target)) {
+      showMenu.value = false;
+    }
+  });
+});
 const isLoggedIn = () => {
   if (userStore.id) {
     router.push("/upload");
